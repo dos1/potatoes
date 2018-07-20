@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Non-Competitive Singing Potatoes
+Exec=potatoes
+Comment=Singing potatoes that are very non-competitive.
+Icon=potatoes
+Terminal=false
+Categories=Game;ArcadeGame;
