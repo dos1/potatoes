@@ -253,7 +253,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 		// When there are no active gamestates, the engine will quit.
 	}
 
-	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || ev->type == ALLEGRO_EVENT_TOUCH_END) {
 		if (data->hovered >= 0) {
 			if (data->mode[data->hovered] >= 0) {
 				al_set_sample_instance_gain(data->song[data->hovered][data->mode[data->hovered]], 0.0);
@@ -264,7 +264,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 				data->mode[data->hovered] = -1;
 			}
 
-			if (ev->mouse.button > 1) {
+			if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && ev->mouse.button > 1) {
 				data->mode[data->hovered] = -1;
 			}
 
