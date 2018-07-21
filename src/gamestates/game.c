@@ -29,6 +29,12 @@ struct GamestateResources {
 	int mode[8];
 	int hovered;
 
+	struct Frame {
+		int frame;
+		int potato;
+		bool alternative;
+	} frame[8];
+
 	ALLEGRO_SAMPLE* sample[8][5];
 	ALLEGRO_SAMPLE_INSTANCE* song[8][5];
 
@@ -39,7 +45,26 @@ struct GamestateResources {
 	ALLEGRO_FONT* font;
 };
 
-int Gamestate_ProgressCount = 60; // number of loading steps as reported by Gamestate_Load; 0 when missing
+int Gamestate_ProgressCount = 76; // number of loading steps as reported by Gamestate_Load; 0 when missing
+
+static void MixerPostprocess(void* buffer, unsigned int samples, void* userdata) {
+	struct Frame* frame = userdata;
+	float* buf = buffer;
+	float sum = 0.0;
+	for (unsigned int i = 0; i < samples; i += 2) {
+		sum += fabs(buf[i]);
+	}
+	sum = pow(sum / 10.0, 2);
+	frame->frame = (sum);
+	if (frame->frame > 3) {
+		frame->frame = 3;
+	}
+	frame->frame = 3 - frame->frame;
+	if (frame->frame == 0) {
+		frame->alternative = !frame->alternative;
+	}
+	//printf("potato %d sum %f\n", frame->potato, sum);
+}
 
 void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta) {
 	// Here you should do all your game logic as if <delta> seconds have passed.
@@ -76,6 +101,11 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	//PrintConsole(game, "%f", time);
 
 	for (int i = 0; i < 8; i++) {
+		float facescale = 0.9;
+		if (i < 4) {
+			facescale = 0.8;
+		}
+
 		data->pyry[i]->tint = i == data->hovered ? al_map_rgb_f(2, 2, 2) : al_map_rgb(255, 255, 255);
 
 		data->pyry[i]->spritesheet->pivotX = 0.5;
@@ -104,6 +134,11 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 			al_use_transform(&transform);
 
 			DrawCenteredTintedScaled(data->pyry[i]->frame->bitmap, data->pyry[i]->tint, 0, 0, data->pyry[i]->scaleX, data->pyry[i]->scaleY, 0);
+			ALLEGRO_BITMAP* buzia = data->buzie[i]->spritesheet->frames[data->frame[i].frame].bitmap;
+			if (data->frame[i].alternative) {
+				buzia = data->buzie[i]->spritesheet->next->frames[data->frame[i].frame].bitmap;
+			}
+			DrawCenteredScaled(buzia, 0, 0, facescale, facescale, 0);
 
 			if (data->hovered == i) {
 				al_use_transform(&orig);
@@ -113,6 +148,7 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 		} else {
 			al_use_transform(&orig);
 			DrawCharacter(game, data->pyry[i]);
+			DrawCenteredScaled(data->buzie[i]->frame->bitmap, GetCharacterX(game, data->pyry[i]), GetCharacterY(game, data->pyry[i]), facescale, facescale, 0);
 		}
 
 		al_use_transform(&orig);
@@ -221,8 +257,15 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
 		LoadSpritesheets(game, data->pyry[i], progress);
 
+		data->buzie[i] = CreateCharacter(game, "face");
+		//RegisterSpritesheet(game, data->buzie[i], "off");
+		RegisterSpritesheet(game, data->buzie[i], "1");
+		RegisterSpritesheet(game, data->buzie[i], "2");
+		LoadSpritesheets(game, data->buzie[i], progress);
+
 		data->mixer[i] = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 		al_attach_mixer_to_mixer(data->mixer[i], game->audio.music);
+		al_set_mixer_postprocess_callback(data->mixer[i], MixerPostprocess, &data->frame[i]);
 		progress(game);
 
 		for (int j = 0; j < 5; j++) {
@@ -253,7 +296,7 @@ void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
 
 	for (int i = 0; i < 8; i++) {
 		DestroyCharacter(game, data->pyry[i]);
-		//DestroyCharacter(game, data->buzie[i]);
+		DestroyCharacter(game, data->buzie[i]);
 		for (int j = 0; j < 5; j++) {
 			al_destroy_sample_instance(data->song[i][j]);
 			al_destroy_sample(data->sample[i][j]);
