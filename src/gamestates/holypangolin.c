@@ -51,7 +51,8 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev) {
 	if (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) || (ev->type == ALLEGRO_EVENT_TOUCH_END)) {
-		SwitchCurrentGamestate(game, SKIP_GAMESTATE);
+		UnloadAllGamestates(game);
+		StartGamestate(game, SKIP_GAMESTATE);
 	}
 }
 
@@ -82,4 +83,12 @@ void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 
 void Gamestate_Stop(struct Game* game, struct GamestateResources* data) {
 	al_set_audio_stream_playing(data->monkeys, false);
+}
+
+void Gamestate_Pause(struct Game* game, struct GamestateResources* data) {
+	al_set_audio_stream_playing(data->monkeys, false);
+}
+
+void Gamestate_Resume(struct Game* game, struct GamestateResources* data) {
+	al_set_audio_stream_playing(data->monkeys, true);
 }

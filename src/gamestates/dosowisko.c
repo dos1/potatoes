@@ -161,12 +161,11 @@ void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev) {
 	if (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) || (ev->type == ALLEGRO_EVENT_TOUCH_END)) {
-		SwitchCurrentGamestate(game, SKIP_GAMESTATE);
-		if (strcmp(SKIP_GAMESTATE, NEXT_GAMESTATE) != 0) {
-			UnloadGamestate(game, NEXT_GAMESTATE);
-		}
+		UnloadAllGamestates(game);
+		StartGamestate(game, SKIP_GAMESTATE);
 	}
 }
+
 void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	struct GamestateResources* data = malloc(sizeof(struct GamestateResources));
 	int flags = al_get_new_bitmap_flags();
@@ -240,6 +239,9 @@ void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
 }
 
 void Gamestate_Reload(struct Game* game, struct GamestateResources* data) {
+	int flags = al_get_new_bitmap_flags();
+	al_set_new_bitmap_flags(flags ^ ALLEGRO_MAG_LINEAR);
 	data->bitmap = CreateNotPreservedBitmap(320, 180);
 	data->pixelator = CreateNotPreservedBitmap(320, 180);
+	al_set_new_bitmap_flags(flags);
 }
