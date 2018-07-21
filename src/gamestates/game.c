@@ -33,6 +33,8 @@ struct GamestateResources {
 	ALLEGRO_SAMPLE_INSTANCE* song[8][5];
 
 	ALLEGRO_BITMAP *scene, *light;
+
+	ALLEGRO_FONT* font;
 };
 
 int Gamestate_ProgressCount = 50; // number of loading steps as reported by Gamestate_Load; 0 when missing
@@ -103,7 +105,8 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 
 			if (data->hovered == i) {
 				al_use_transform(&orig);
-				DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+				al_draw_text(data->font, al_map_rgb(255, 255, 255), game->data->mouseX * game->viewport.width + 3, game->data->mouseY * game->viewport.height + 3, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+				al_draw_text(data->font, al_map_rgb(0, 0, 0), game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
 			}
 		} else {
 			al_use_transform(&orig);
@@ -130,6 +133,10 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 
 			data->mode[data->hovered]++;
 			if (data->mode[data->hovered] > 4) {
+				data->mode[data->hovered] = -1;
+			}
+
+			if (ev->mouse.button > 1) {
 				data->mode[data->hovered] = -1;
 			}
 
@@ -168,12 +175,16 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 			al_attach_sample_instance_to_mixer(data->song[i][j], game->audio.music);
 			al_set_sample_instance_playmode(data->song[i][j], ALLEGRO_PLAYMODE_LOOP);
 
-			PrintConsole(game, "%d", al_get_sample_instance_length(data->song[i][j]));
+			if (al_get_sample_instance_length(data->song[i][j]) < 392020) {
+				PrintConsole(game, "i %d j %d length %d", i, j, al_get_sample_instance_length(data->song[i][j]));
+			}
 			al_set_sample_instance_length(data->song[i][j], 392020);
 
 			progress(game);
 		}
 	}
+
+	data->font = al_load_font(GetDataFilePath(game, "fonts/comicsans.ttf"), 64, 0);
 
 	return data;
 }
