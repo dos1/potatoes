@@ -34,12 +34,12 @@ struct GamestateResources {
 
 	ALLEGRO_MIXER* mixer[8];
 
-	ALLEGRO_BITMAP *scene, *light;
+	ALLEGRO_BITMAP *scene, *light, *mic;
 
 	ALLEGRO_FONT* font;
 };
 
-int Gamestate_ProgressCount = 50; // number of loading steps as reported by Gamestate_Load; 0 when missing
+int Gamestate_ProgressCount = 60; // number of loading steps as reported by Gamestate_Load; 0 when missing
 
 void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta) {
 	// Here you should do all your game logic as if <delta> seconds have passed.
@@ -114,6 +114,53 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 			al_use_transform(&orig);
 			DrawCharacter(game, data->pyry[i]);
 		}
+
+		al_use_transform(&orig);
+
+		int offsetx, offsety;
+		bool flip = false;
+		switch (i) {
+			case 0:
+				offsetx = 80;
+				offsety = 40;
+				break;
+			case 1:
+				offsetx = 100;
+				offsety = 100;
+				break;
+			case 2:
+				offsetx = 90;
+				offsety = 60;
+				break;
+			case 3:
+				offsetx = 30;
+				offsety = 90;
+				break;
+			case 4:
+				offsetx = 80;
+				offsety = 110;
+				break;
+			case 5:
+				offsetx = -90;
+				offsety = 80;
+				flip = true;
+				break;
+			case 6:
+				offsetx = 75;
+				offsety = 90;
+				break;
+			case 7:
+				offsetx = -60;
+				offsety = 80;
+				flip = true;
+				break;
+			default:
+				offsetx = 0;
+				offsety = 0;
+				break;
+		}
+
+		DrawCenteredScaled(data->mic, GetCharacterX(game, data->pyry[i]) + offsetx, GetCharacterY(game, data->pyry[i]) + offsety, 0.2, 0.2, flip ? ALLEGRO_FLIP_HORIZONTAL : 0);
 	}
 
 	al_use_transform(&orig);
@@ -166,6 +213,9 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	data->light = al_load_bitmap(GetDataFilePath(game, "light.png"));
 	progress(game);
 
+	data->mic = al_load_bitmap(GetDataFilePath(game, "mic.png"));
+	progress(game);
+
 	for (int i = 0; i < 8; i++) {
 		data->pyry[i] = CreateCharacter(game, "potato");
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
@@ -173,6 +223,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 
 		data->mixer[i] = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 		al_attach_mixer_to_mixer(data->mixer[i], game->audio.music);
+		progress(game);
 
 		for (int j = 0; j < 5; j++) {
 			data->sample[i][j] = al_load_sample(GetDataFilePath(game, PunchNumber(game, PunchNumber(game, "pX/Y.flac", 'X', i), 'Y', j + 1)));
@@ -191,6 +242,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	}
 
 	data->font = al_load_font(GetDataFilePath(game, "fonts/comicsans.ttf"), 64, 0);
+	progress(game);
 
 	return data;
 }
@@ -198,6 +250,20 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
 	// Called when the gamestate library is being unloaded.
 	// Good place for freeing all allocated memory and resources.
+
+	for (int i = 0; i < 8; i++) {
+		DestroyCharacter(game, data->pyry[i]);
+		//DestroyCharacter(game, data->buzie[i]);
+		for (int j = 0; j < 5; j++) {
+			al_destroy_sample_instance(data->song[i][j]);
+			al_destroy_sample(data->sample[i][j]);
+		}
+		al_destroy_mixer(data->mixer[i]);
+	}
+	al_destroy_bitmap(data->scene);
+	al_destroy_bitmap(data->light);
+	al_destroy_bitmap(data->mic);
+	al_destroy_font(data->font);
 	free(data);
 }
 
