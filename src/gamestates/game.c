@@ -32,6 +32,8 @@ struct GamestateResources {
 	ALLEGRO_SAMPLE* sample[8][5];
 	ALLEGRO_SAMPLE_INSTANCE* song[8][5];
 
+	ALLEGRO_MIXER* mixer[8];
+
 	ALLEGRO_BITMAP *scene, *light;
 
 	ALLEGRO_FONT* font;
@@ -169,11 +171,15 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
 		LoadSpritesheets(game, data->pyry[i], progress);
 
+		data->mixer[i] = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+		al_attach_mixer_to_mixer(data->mixer[i], game->audio.music);
+
 		for (int j = 0; j < 5; j++) {
 			data->sample[i][j] = al_load_sample(GetDataFilePath(game, PunchNumber(game, PunchNumber(game, "pX/Y.flac", 'X', i), 'Y', j + 1)));
 			data->song[i][j] = al_create_sample_instance(data->sample[i][j]);
-			al_attach_sample_instance_to_mixer(data->song[i][j], game->audio.music);
+			al_attach_sample_instance_to_mixer(data->song[i][j], data->mixer[i]);
 			al_set_sample_instance_playmode(data->song[i][j], ALLEGRO_PLAYMODE_LOOP);
+			al_set_sample_instance_pan(data->song[i][j], -0.375 + (i % 4) * 0.25);
 
 			if (al_get_sample_instance_length(data->song[i][j]) < 392020) {
 				PrintConsole(game, "i %d j %d length %d", i, j, al_get_sample_instance_length(data->song[i][j]));
