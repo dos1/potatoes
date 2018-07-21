@@ -55,7 +55,7 @@ static void MixerPostprocess(void* buffer, unsigned int samples, void* userdata)
 		sum += fabs(buf[i]);
 	}
 	sum = pow(sum / 10.0, 2);
-	frame->frame = (sum);
+	frame->frame = sum;
 	if (frame->frame > 3) {
 		frame->frame = 3;
 	}
@@ -103,7 +103,50 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	for (int i = 0; i < 8; i++) {
 		float facescale = 0.9;
 		if (i < 4) {
-			facescale = 0.8;
+			facescale = 0.75;
+		}
+
+		int foffsetx, foffsety;
+		bool fflip = false;
+		switch (i) {
+			case 0:
+				foffsetx = 0;
+				foffsety = 15;
+				break;
+			case 1:
+				foffsetx = 40;
+				foffsety = 25;
+				break;
+			case 2:
+				foffsetx = 20;
+				foffsety = 10;
+				break;
+			case 3:
+				foffsetx = 10;
+				foffsety = 30;
+				break;
+			case 4:
+				foffsetx = 5;
+				foffsety = 5;
+				break;
+			case 5:
+				foffsetx = -45;
+				foffsety = 25;
+				fflip = true;
+				break;
+			case 6:
+				foffsetx = 20;
+				foffsety = 60;
+				break;
+			case 7:
+				foffsetx = 10;
+				foffsety = 50;
+				fflip = true;
+				break;
+			default:
+				foffsetx = 0;
+				foffsety = 0;
+				break;
 		}
 
 		data->pyry[i]->tint = i == data->hovered ? al_map_rgb_f(2, 2, 2) : al_map_rgb(255, 255, 255);
@@ -138,7 +181,7 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 			if (data->frame[i].alternative) {
 				buzia = data->buzie[i]->spritesheet->next->frames[data->frame[i].frame].bitmap;
 			}
-			DrawCenteredScaled(buzia, 0, 0, facescale, facescale, 0);
+			DrawCenteredScaled(buzia, foffsetx, foffsety, facescale, facescale, fflip ? ALLEGRO_FLIP_HORIZONTAL : 0);
 
 			if (data->hovered == i) {
 				al_use_transform(&orig);
@@ -148,7 +191,7 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 		} else {
 			al_use_transform(&orig);
 			DrawCharacter(game, data->pyry[i]);
-			DrawCenteredScaled(data->buzie[i]->frame->bitmap, GetCharacterX(game, data->pyry[i]), GetCharacterY(game, data->pyry[i]), facescale, facescale, 0);
+			DrawCenteredScaled(data->buzie[i]->frame->bitmap, GetCharacterX(game, data->pyry[i]) + foffsetx, GetCharacterY(game, data->pyry[i]) + foffsety, facescale, facescale, fflip ? ALLEGRO_FLIP_HORIZONTAL : 0);
 		}
 
 		al_use_transform(&orig);
@@ -169,8 +212,8 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 				offsety = 60;
 				break;
 			case 3:
-				offsetx = 30;
-				offsety = 90;
+				offsetx = 55;
+				offsety = 100;
 				break;
 			case 4:
 				offsetx = 80;
