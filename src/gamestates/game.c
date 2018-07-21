@@ -29,11 +29,13 @@ struct GamestateResources {
 	int mode[8];
 	int hovered;
 
-	ALLEGRO_SAMPLE* sample[8][4];
-	ALLEGRO_SAMPLE_INSTANCE* song[8][4];
+	ALLEGRO_SAMPLE* sample[8][5];
+	ALLEGRO_SAMPLE_INSTANCE* song[8][5];
+
+	ALLEGRO_BITMAP *scene, *light;
 };
 
-int Gamestate_ProgressCount = 1; // number of loading steps as reported by Gamestate_Load; 0 when missing
+int Gamestate_ProgressCount = 50; // number of loading steps as reported by Gamestate_Load; 0 when missing
 
 void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta) {
 	// Here you should do all your game logic as if <delta> seconds have passed.
@@ -44,27 +46,42 @@ void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double 
 			data->hovered = i;
 		}
 	}
+
+	/*
+	PrintConsole(game, "START");
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 5; j++) {
+			PrintConsole(game, "%d", al_get_sample_instance_position(data->song[i][j]));
+		}
+	}
+	*/
 }
 
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	// Draw everything to the screen here.
-	ALLEGRO_TRANSFORM transform, orig = *al_get_current_transform();
 
 	float time = al_get_sample_instance_position(data->song[0][0]) / (float)al_get_sample_instance_length(data->song[0][0]) * 8;
 
-	PrintConsole(game, "%f", time);
+	al_clear_to_color(al_map_rgb(255, 255, 255));
+	al_draw_rotated_bitmap(data->light, 0, 0, 445, 160, cos(al_get_time() * ALLEGRO_PI / 2.0) / 32.0, ALLEGRO_FLIP_HORIZONTAL);
+	al_draw_rotated_bitmap(data->light, al_get_bitmap_width(data->light), 0, 1640, 160, sin(al_get_time() * ALLEGRO_PI / 2.0) / 32.0, 0);
+	al_draw_bitmap(data->scene, 0, 0, 0);
+
+	ALLEGRO_TRANSFORM transform, orig = *al_get_current_transform();
+
+	//PrintConsole(game, "%f", time);
 
 	for (int i = 0; i < 8; i++) {
 		data->pyry[i]->tint = i == data->hovered ? al_map_rgb_f(2, 2, 2) : al_map_rgb(255, 255, 255);
 
-		data->pyry[i]->spritesheet->pivotX = -0.5;
-		data->pyry[i]->spritesheet->pivotY = -0.5;
+		data->pyry[i]->spritesheet->pivotX = 0.5;
+		data->pyry[i]->spritesheet->pivotY = 0.5;
 
 		if (data->mode[i] >= 0) {
 			al_identity_transform(&transform);
 
 			al_translate_transform(&transform, -al_get_bitmap_width(data->pyry[i]->frame->bitmap) / 2.0, -al_get_bitmap_height(data->pyry[i]->frame->bitmap) / 2.0);
-			al_scale_transform(&transform, data->pyry[i]->scaleX, data->pyry[i]->scaleY);
+			//al_scale_transform(&transform, data->pyry[i]->scaleX, data->pyry[i]->scaleY);
 			al_horizontal_shear_transform(&transform, sin(time * ALLEGRO_PI + ALLEGRO_PI * i) * 0.05);
 			al_translate_transform(&transform, al_get_bitmap_width(data->pyry[i]->frame->bitmap) / 2.0, al_get_bitmap_height(data->pyry[i]->frame->bitmap) / 2.0);
 
@@ -73,10 +90,16 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 			al_translate_transform(&transform, 0, al_get_bitmap_height(data->pyry[i]->frame->bitmap));
 
 			al_translate_transform(&transform, GetCharacterX(game, data->pyry[i]), GetCharacterY(game, data->pyry[i]));
+
 			al_compose_transform(&transform, &orig);
 			al_use_transform(&transform);
 
-			al_draw_tinted_bitmap(data->pyry[i]->frame->bitmap, data->pyry[i]->tint, 0, 0, 0);
+			DrawCenteredTintedScaled(data->pyry[i]->frame->bitmap, data->pyry[i]->tint, 0, 0, data->pyry[i]->scaleX, data->pyry[i]->scaleY, 0);
+
+			if (data->hovered == i) {
+				al_use_transform(&orig);
+				DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+			}
 		} else {
 			al_use_transform(&orig);
 			DrawCharacter(game, data->pyry[i]);
@@ -101,7 +124,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 			}
 
 			data->mode[data->hovered]++;
-			if (data->mode[data->hovered] > 3) {
+			if (data->mode[data->hovered] > 4) {
 				data->mode[data->hovered] = -1;
 			}
 
@@ -122,18 +145,28 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	// create VBOs, etc. do it in Gamestate_PostLoad.
 
 	struct GamestateResources* data = calloc(1, sizeof(struct GamestateResources));
+
+	data->scene = al_load_bitmap(GetDataFilePath(game, "scene.png"));
 	progress(game); // report that we progressed with the loading, so the engine can move a progress bar
+
+	data->light = al_load_bitmap(GetDataFilePath(game, "light.png"));
+	progress(game);
 
 	for (int i = 0; i < 8; i++) {
 		data->pyry[i] = CreateCharacter(game, "potato");
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
 		LoadSpritesheets(game, data->pyry[i], progress);
 
-		for (int j = 0; j < 4; j++) {
-			data->sample[i][j] = al_load_sample(GetDataFilePath(game, PunchNumber(game, "potatoesX.wav", 'X', j)));
+		for (int j = 0; j < 5; j++) {
+			data->sample[i][j] = al_load_sample(GetDataFilePath(game, PunchNumber(game, PunchNumber(game, "pX/Y.flac", 'X', i), 'Y', j + 1)));
 			data->song[i][j] = al_create_sample_instance(data->sample[i][j]);
 			al_attach_sample_instance_to_mixer(data->song[i][j], game->audio.music);
 			al_set_sample_instance_playmode(data->song[i][j], ALLEGRO_PLAYMODE_LOOP);
+
+			PrintConsole(game, "%d", al_get_sample_instance_length(data->song[i][j]));
+			al_set_sample_instance_length(data->song[i][j], 392020);
+
+			progress(game);
 		}
 	}
 
@@ -149,14 +182,20 @@ void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
 void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 	// Called when this gamestate gets control. Good place for initializing state,
 	// playing music etc.
-	for (int i = 0; i < 8; i++) {
-		SetCharacterPosition(game, data->pyry[i], 200 * i + 20, pow(sin(i / 7.0 * ALLEGRO_PI), 2) * 600 + 100, 0);
+	for (int i = 0; i < 4; i++) {
+		SetCharacterPosition(game, data->pyry[i], 300 * i + 600, pow(sin(i / 7.0 * ALLEGRO_PI), 2) * 20 + 470, 0);
 		data->pyry[i]->scaleX = 0.5;
 		data->pyry[i]->scaleY = 0.5;
+	}
+	for (int i = 4; i < 8; i++) {
+		SetCharacterPosition(game, data->pyry[i], 320 * (i - 4) + 500, pow(cos(i / 7.0 * ALLEGRO_PI), 2) * 50 + 630, 0);
+		data->pyry[i]->scaleX = 0.666;
+		data->pyry[i]->scaleY = 0.666;
+	}
 
+	for (int i = 0; i < 8; i++) {
 		data->mode[i] = -1;
-
-		for (int j = 0; j < 4; j++) {
+		for (int j = 0; j < 5; j++) {
 			al_set_sample_instance_gain(data->song[i][j], 0.0);
 			al_play_sample_instance(data->song[i][j]);
 		}
