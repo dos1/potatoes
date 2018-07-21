@@ -80,9 +80,14 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 		if (data->mode[i] >= 0) {
 			al_identity_transform(&transform);
 
+			int x = i;
+			if (x > 3) {
+				x--;
+			}
+
 			al_translate_transform(&transform, -al_get_bitmap_width(data->pyry[i]->frame->bitmap) / 2.0, -al_get_bitmap_height(data->pyry[i]->frame->bitmap) / 2.0);
 			//al_scale_transform(&transform, data->pyry[i]->scaleX, data->pyry[i]->scaleY);
-			al_horizontal_shear_transform(&transform, sin(time * ALLEGRO_PI + ALLEGRO_PI * i) * 0.05);
+			al_horizontal_shear_transform(&transform, sin(time * ALLEGRO_PI + ALLEGRO_PI * x + 0.075 * i) * 0.05);
 			al_translate_transform(&transform, al_get_bitmap_width(data->pyry[i]->frame->bitmap) / 2.0, al_get_bitmap_height(data->pyry[i]->frame->bitmap) / 2.0);
 
 			al_translate_transform(&transform, 0, -al_get_bitmap_height(data->pyry[i]->frame->bitmap));
