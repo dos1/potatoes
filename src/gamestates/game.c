@@ -322,7 +322,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 				PrintConsole(game, "TOO SHORT i %d j %d length %d", i, j + 1, al_get_sample_instance_length(data->song[i][j]));
 				//al_rest(1.0);
 			}
-			al_set_sample_instance_length(data->song[i][j], 392020);
+			al_set_sample_instance_length(data->song[i][j], 391000);
 
 			progress(game);
 		}
