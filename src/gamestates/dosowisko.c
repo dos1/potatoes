@@ -36,7 +36,7 @@ struct GamestateResources {
 	struct Timeline* timeline;
 };
 
-int Gamestate_ProgressCount = 5;
+int Gamestate_ProgressCount = 6;
 
 static const char* text = "# dosowisko.net";
 
@@ -173,9 +173,10 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 
 	data->timeline = TM_Init(game, data, "main");
 	data->bitmap = CreateNotPreservedBitmap(320, 180);
-	data->checkerboard = al_create_bitmap(320, 180);
 	data->pixelator = CreateNotPreservedBitmap(320, 180);
+	(*progress)(game);
 
+	data->checkerboard = al_create_bitmap(320, 180);
 	al_set_target_bitmap(data->checkerboard);
 	al_lock_bitmap(data->checkerboard, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
 	int x, y;
@@ -194,6 +195,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	data->font = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"),
 		(int)(180 * 0.1666 / 8) * 8, 0);
 	(*progress)(game);
+
 	data->sample = al_load_sample(GetDataFilePath(game, "dosowisko.flac"));
 	data->sound = al_create_sample_instance(data->sample);
 	al_attach_sample_instance_to_mixer(data->sound, game->audio.music);

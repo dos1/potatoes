@@ -243,6 +243,10 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	}
 
 	al_use_transform(&orig);
+
+	if (game->config.mute) {
+		al_draw_text(data->font, al_map_rgb(0, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, "muted!!1");
+	}
 }
 
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev) {
