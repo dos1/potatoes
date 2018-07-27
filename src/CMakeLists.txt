@@ -6,18 +6,16 @@ set(EXECUTABLE_SRC_LIST "main.c")
 
 if(MINGW)
     # resource compilation for MinGW
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/icon.o COMMAND ${CMAKE_RC_COMPILER} -I${CMAKE_SOURCE_DIR} -i${CMAKE_SOURCE_DIR}/data/icons/icon.rc -o ${CMAKE_CURRENT_BINARY_DIR}/icon.o )
-    set(EXECUTABLE_SRC_LIST ${EXECUTABLE_SRC_LIST} ${CMAKE_CURRENT_BINARY_DIR}/icon.o)
+    set(EXECUTABLE_SRC_LIST ${EXECUTABLE_SRC_LIST} ${CMAKE_SOURCE_DIR}/data/icons/icon.rc)
     set(LINK_FLAGS -Wl,-subsystem,windows)
 endif(MINGW)
 
 if (APPLE)
     set(EXECUTABLE_SRC_LIST ${EXECUTABLE_SRC_LIST} ${CMAKE_SOURCE_DIR}/data/icons/${LIBSUPERDERPY_GAMENAME}.icns)
-    set_source_files_properties(${CMAKE_SOURCE_DIR}/data/icons/${LIBSUPERDERPY_GAMENAME}.icns PROPERTIES
-	   MACOSX_PACKAGE_LOCATION "Resources")
-   endif(APPLE)
+    set_source_files_properties(${CMAKE_SOURCE_DIR}/data/icons/${LIBSUPERDERPY_GAMENAME}.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif(APPLE)
 
-add_libsuperderpy_target(${EXECUTABLE_SRC_LIST})
+add_libsuperderpy_target("${EXECUTABLE_SRC_LIST}")
 target_link_libraries(${EXECUTABLE} libsuperderpy "libsuperderpy-${LIBSUPERDERPY_GAMENAME}")
 install(TARGETS ${EXECUTABLE} DESTINATION ${BIN_INSTALL_DIR})
 
