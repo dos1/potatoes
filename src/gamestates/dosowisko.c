@@ -36,7 +36,7 @@ struct GamestateResources {
 	struct Timeline* timeline;
 };
 
-int Gamestate_ProgressCount = 6;
+int Gamestate_ProgressCount = 5;
 
 static const char* text = "# dosowisko.net";
 
@@ -174,22 +174,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	data->timeline = TM_Init(game, data, "main");
 	data->bitmap = CreateNotPreservedBitmap(320, 180);
 	data->pixelator = CreateNotPreservedBitmap(320, 180);
-	(*progress)(game);
-
 	data->checkerboard = al_create_bitmap(320, 180);
-	al_set_target_bitmap(data->checkerboard);
-	al_lock_bitmap(data->checkerboard, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
-	int x, y;
-	for (x = 0; x < al_get_bitmap_width(data->checkerboard); x = x + 2) {
-		for (y = 0; y < al_get_bitmap_height(data->checkerboard); y = y + 2) {
-			al_put_pixel(x, y, al_map_rgba(0, 0, 0, 64));
-			al_put_pixel(x + 1, y, al_map_rgba(0, 0, 0, 0));
-			al_put_pixel(x, y + 1, al_map_rgba(0, 0, 0, 0));
-			al_put_pixel(x + 1, y + 1, al_map_rgba(0, 0, 0, 0));
-		}
-	}
-	al_unlock_bitmap(data->checkerboard);
-	al_set_target_backbuffer(game->display);
 	(*progress)(game);
 
 	data->font = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"),
@@ -217,6 +202,22 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	al_set_new_bitmap_flags(flags);
 
 	return data;
+}
+
+void Gamestate_PostLoad(struct Game* game, struct GamestateResources* data) {
+	al_set_target_bitmap(data->checkerboard);
+	al_lock_bitmap(data->checkerboard, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
+	int x, y;
+	for (x = 0; x < al_get_bitmap_width(data->checkerboard); x = x + 2) {
+		for (y = 0; y < al_get_bitmap_height(data->checkerboard); y = y + 2) {
+			al_put_pixel(x, y, al_map_rgba(0, 0, 0, 64));
+			al_put_pixel(x + 1, y, al_map_rgba(0, 0, 0, 0));
+			al_put_pixel(x, y + 1, al_map_rgba(0, 0, 0, 0));
+			al_put_pixel(x + 1, y + 1, al_map_rgba(0, 0, 0, 0));
+		}
+	}
+	al_unlock_bitmap(data->checkerboard);
+	al_set_target_backbuffer(game->display);
 }
 
 void Gamestate_Stop(struct Game* game, struct GamestateResources* data) {
