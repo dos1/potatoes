@@ -53,6 +53,12 @@ bool GlobalEventHandler(struct Game* game, ALLEGRO_EVENT* ev) {
 		game->data->mouseY = Clamp(0, 1, (ev->touch.y - game->_priv.clip_rect.y) / (double)game->_priv.clip_rect.h);
 	}
 
+#ifdef ALLEGRO_ANDROID
+	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_BACK)) {
+		QuitGame(game, true);
+	}
+#endif
+
 	return false;
 }
 
