@@ -25,7 +25,7 @@ struct GamestateResources {
 	// This struct is for every resource allocated and used by your gamestate.
 	// It gets created on load and then gets passed around to all other function calls.
 
-	struct Character *pyry[8], *buzie[8];
+	struct Character *pyry[8], *buzie[8], *buzia;
 	int mode[8];
 	int hovered;
 
@@ -45,7 +45,7 @@ struct GamestateResources {
 	ALLEGRO_FONT* font;
 };
 
-int Gamestate_ProgressCount = 76; // number of loading steps as reported by Gamestate_Load; 0 when missing
+int Gamestate_ProgressCount = 71; // number of loading steps as reported by Gamestate_Load; 0 when missing
 
 static void MixerPostprocess(void* buffer, unsigned int samples, void* userdata) {
 	struct Frame* frame = userdata;
@@ -177,9 +177,9 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 			al_use_transform(&transform);
 
 			DrawCenteredTintedScaled(data->pyry[i]->frame->bitmap, data->pyry[i]->tint, 0, 0, data->pyry[i]->scaleX, data->pyry[i]->scaleY, 0);
-			ALLEGRO_BITMAP* buzia = data->buzie[i]->spritesheet->frames[data->frame[i].frame].bitmap;
+			ALLEGRO_BITMAP* buzia = data->buzie[i]->spritesheets->frames[data->frame[i].frame].bitmap;
 			if (data->frame[i].alternative) {
-				buzia = data->buzie[i]->spritesheet->next->frames[data->frame[i].frame].bitmap;
+				buzia = data->buzie[i]->spritesheets->next->frames[data->frame[i].frame].bitmap;
 			}
 			DrawCenteredScaled(buzia, foffsetx, foffsety, facescale, facescale, fflip ? ALLEGRO_FLIP_HORIZONTAL : 0);
 
@@ -299,16 +299,22 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	data->mic = al_load_bitmap(GetDataFilePath(game, "mic.png"));
 	progress(game);
 
+	data->buzia = CreateCharacter(game, "face");
+	RegisterSpritesheet(game, data->buzia, "1");
+	RegisterSpritesheet(game, data->buzia, "2");
+	LoadSpritesheets(game, data->buzia, progress);
+	progress(game);
+
 	for (int i = 0; i < 8; i++) {
+		data->buzie[i] = CreateCharacter(game, "face");
+		data->buzie[i]->shared = true;
+		data->buzie[i]->spritesheets = data->buzia->spritesheets;
+		SelectSpritesheet(game, data->buzie[i], "1");
+		progress(game);
+
 		data->pyry[i] = CreateCharacter(game, "potato");
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
 		LoadSpritesheets(game, data->pyry[i], progress);
-
-		data->buzie[i] = CreateCharacter(game, "face");
-		//RegisterSpritesheet(game, data->buzie[i], "off");
-		RegisterSpritesheet(game, data->buzie[i], "1");
-		RegisterSpritesheet(game, data->buzie[i], "2");
-		LoadSpritesheets(game, data->buzie[i], progress);
 
 		data->mixer[i] = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 		al_attach_mixer_to_mixer(data->mixer[i], game->audio.music);
@@ -351,6 +357,7 @@ void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
 		}
 		al_destroy_mixer(data->mixer[i]);
 	}
+	DestroyCharacter(game, data->buzia);
 	al_destroy_bitmap(data->scene);
 	al_destroy_bitmap(data->light);
 	al_destroy_bitmap(data->mic);
