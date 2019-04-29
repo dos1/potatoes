@@ -52,7 +52,7 @@ static void MixerPostprocess(void* buffer, unsigned int samples, void* userdata)
 	float* buf = buffer;
 	float sum = 0.0;
 	for (unsigned int i = 0; i < samples; i += 2) {
-		sum += fabs(buf[i]);
+		sum += fabsf(buf[i]);
 	}
 	sum = pow(sum / 10.0, 2);
 	frame->frame = sum;
@@ -316,7 +316,8 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
 		LoadSpritesheets(game, data->pyry[i], progress);
 
-		data->mixer[i] = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+		int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "48000"), NULL, 10);
+		data->mixer[i] = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 		al_attach_mixer_to_mixer(data->mixer[i], game->audio.music);
 		al_set_mixer_postprocess_callback(data->mixer[i], MixerPostprocess, &data->frame[i]);
 		progress(game);
