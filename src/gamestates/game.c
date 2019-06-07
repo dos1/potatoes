@@ -316,8 +316,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 		RegisterSpritesheet(game, data->pyry[i], PunchNumber(game, "X", 'X', i));
 		LoadSpritesheets(game, data->pyry[i], progress);
 
-		int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "48000"), NULL, 10);
-		data->mixer[i] = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+		data->mixer[i] = al_create_mixer(al_get_voice_frequency(game->audio.v), ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 		al_attach_mixer_to_mixer(data->mixer[i], game->audio.music);
 		al_set_mixer_postprocess_callback(data->mixer[i], MixerPostprocess, &data->frame[i]);
 		progress(game);
