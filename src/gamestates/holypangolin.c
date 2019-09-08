@@ -50,7 +50,7 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 }
 
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev) {
-	if (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) || (ev->type == ALLEGRO_EVENT_TOUCH_END)) {
+	if (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) || (ev->type == ALLEGRO_EVENT_TOUCH_END) || (ev->type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP)) {
 		UnloadAllGamestates(game);
 		StartGamestate(game, SKIP_GAMESTATE);
 	}
@@ -61,7 +61,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	data->bmp = al_load_bitmap(GetDataFilePath(game, "holypangolin.webp"));
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
 
-	data->monkeys = al_load_audio_stream(GetDataFilePath(game, "holypangolin.flac"), 4, 1024);
+	data->monkeys = al_load_audio_stream(GetDataFilePath(game, "holypangolin.flac"), 4, 2048);
 	al_set_audio_stream_playing(data->monkeys, false);
 	al_attach_audio_stream_to_mixer(data->monkeys, game->audio.fx);
 	al_set_audio_stream_gain(data->monkeys, 0.75);
