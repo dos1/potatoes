@@ -247,6 +247,12 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	if (game->config.mute) {
 		al_draw_text(data->font, al_map_rgb(0, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, "muted!!1");
 	}
+
+#ifndef ALLEGRO_ANDROID
+	if (game->config.fullscreen) {
+		al_draw_text(data->font, al_map_rgb(0, 0, 0), game->viewport.width - 50, 20, ALLEGRO_ALIGN_RIGHT, "X");
+	}
+#endif
 }
 
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev) {
@@ -256,6 +262,26 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 		UnloadCurrentGamestate(game); // mark this gamestate to be stopped and unloaded
 		// When there are no active gamestates, the engine will quit.
 	}
+
+#ifndef ALLEGRO_ANDROID
+	if (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN && game->config.fullscreen) {
+		float x = Clamp(0, 1, (ev->touch.x - game->clip_rect.x) / (double)game->clip_rect.w);
+		float y = Clamp(0, 1, (ev->touch.y - game->clip_rect.y) / (double)game->clip_rect.h);
+		if ((x >= 0.93) && (y <= 0.1)) {
+			UnloadAllGamestates(game);
+			return;
+		}
+	}
+
+	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && game->config.fullscreen) {
+		float x = Clamp(0, 1, (ev->mouse.x - game->clip_rect.x) / (double)game->clip_rect.w);
+		float y = Clamp(0, 1, (ev->mouse.y - game->clip_rect.y) / (double)game->clip_rect.h);
+		if ((x >= 0.93) && (y <= 0.1)) {
+			UnloadAllGamestates(game);
+			return;
+		}
+	}
+#endif
 
 	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || ev->type == ALLEGRO_EVENT_TOUCH_END) {
 		if (data->hovered >= 0) {
