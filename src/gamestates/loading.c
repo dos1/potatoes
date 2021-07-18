@@ -23,7 +23,7 @@
 
 /*! \brief Resources used by Loading state. */
 struct GamestateResources {
-	bool unused;
+	ALLEGRO_BITMAP* stage;
 };
 
 int Gamestate_ProgressCount = -1;
@@ -33,16 +33,19 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta){};
 
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
-	al_draw_filled_rectangle(0, game->viewport.height * 0.98, game->viewport.width, game->viewport.height, al_map_rgba(32, 32, 32, 32));
-	al_draw_filled_rectangle(0, game->viewport.height * 0.98, game->loading.progress * game->viewport.width, game->viewport.height, al_map_rgba(128, 128, 128, 128));
+	al_draw_bitmap(data->stage, 0, 0, 0);
+	al_draw_filled_rectangle(game->viewport.width * 0.44, game->viewport.height * 0.55, game->viewport.width * 0.64, game->viewport.height * 0.57, al_map_rgba(222, 222, 222, 255));
+	al_draw_filled_rectangle(game->viewport.width * 0.44, game->viewport.height * 0.55, game->viewport.width * (0.44 + 0.2 * game->loading.progress), game->viewport.height * 0.57, al_map_rgba(128, 128, 128, 255));
 };
 
 void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 	struct GamestateResources* data = malloc(sizeof(struct GamestateResources));
+	data->stage = al_load_bitmap(GetDataFilePath(game, "scene.png"));
 	return data;
 }
 
 void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
+	al_destroy_bitmap(data->stage);
 	free(data);
 }
 
