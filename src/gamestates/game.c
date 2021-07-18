@@ -249,9 +249,11 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	}
 
 #ifndef ALLEGRO_ANDROID
+#ifndef __SWITCH__
 	if (game->config.fullscreen) {
 		al_draw_text(data->font, al_map_rgb(0, 0, 0), game->viewport.width - 50, 20, ALLEGRO_ALIGN_RIGHT, "X");
 	}
+#endif
 #endif
 }
 
