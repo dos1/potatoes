@@ -364,7 +364,7 @@ void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
 		}
 	}
 
-	data->font = al_load_font(GetDataFilePath(game, "fonts/comicsans.ttf"), 64, 0);
+	data->font = al_load_font(GetDataFilePath(game, "fonts/ComicNeue-Bold.ttf"), 96, 0);
 	progress(game);
 
 	return data;
