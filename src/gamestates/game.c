@@ -182,18 +182,12 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 			}
 			DrawCenteredScaled(buzia, foffsetx, foffsety, facescale, facescale, fflip ? ALLEGRO_FLIP_HORIZONTAL : 0);
 
-			if (data->hovered == i) {
-				al_use_transform(&orig);
-				al_draw_text(data->font, al_map_rgb(255, 255, 255), game->data->mouseX * game->viewport.width + 3, game->data->mouseY * game->viewport.height + 3, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
-				al_draw_text(data->font, al_map_rgb(0, 0, 0), game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
-			}
+			al_use_transform(&orig);
 		} else {
 			al_use_transform(&orig);
 			DrawCharacter(game, data->pyry[i]);
 			DrawCenteredScaled(data->buzie[i]->frame->bitmap, GetCharacterX(game, data->pyry[i]) + foffsetx, GetCharacterY(game, data->pyry[i]) + foffsety, facescale, facescale, fflip ? ALLEGRO_FLIP_HORIZONTAL : 0);
 		}
-
-		al_use_transform(&orig);
 
 		int offsetx, offsety;
 		bool flip = false;
@@ -242,6 +236,13 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	}
 
 	al_use_transform(&orig);
+
+	for (int i = 0; i < 8; i++) {
+		if (data->mode[i] >= 0 && data->hovered == i) {
+			al_draw_text(data->font, al_map_rgb(255, 255, 255), game->data->mouseX * game->viewport.width + 3, game->data->mouseY * game->viewport.height + 3, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+			al_draw_text(data->font, al_map_rgb(0, 0, 0), game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+		}
+	}
 
 	if (game->config.mute) {
 		al_draw_text(data->font, al_map_rgb(0, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, "muted!!1");
