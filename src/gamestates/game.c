@@ -28,6 +28,7 @@ struct GamestateResources {
 	struct Character *pyry[8], *buzie[8], *buzia;
 	int mode[8];
 	int hovered;
+	double timer;
 
 	struct Frame {
 		int frame;
@@ -66,24 +67,23 @@ static void MixerPostprocess(void* buffer, unsigned int samples, void* userdata)
 	//printf("potato %d sum %f\n", frame->potato, sum);
 }
 
-void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta) {
-	// Here you should do all your game logic as if <delta> seconds have passed.
-	//PrintConsole(game, "%f x %f", game->data->mouseX, game->data->mouseY);
+static void UpdateHover(struct Game* game, struct GamestateResources* data) {
 	data->hovered = -1;
 	for (int i = 0; i < 8; i++) {
 		if (IsOnCharacter(game, data->pyry[i], game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, true)) {
 			data->hovered = i;
 		}
 	}
+}
 
-	/*
-	PrintConsole(game, "START");
-	for (int i = 0; i < 8; i++) {
-		for (int j = 0; j < 5; j++) {
-			PrintConsole(game, "%d", al_get_sample_instance_position(data->song[i][j]));
+void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta) {
+	// Here you should do all your game logic as if <delta> seconds have passed.
+	if (data->timer > 0) {
+		data->timer -= delta;
+		if (data->timer <= 0) {
+			data->hovered = -1;
 		}
 	}
-	*/
 }
 
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
@@ -263,27 +263,37 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 		// When there are no active gamestates, the engine will quit.
 	}
 
-#ifndef ALLEGRO_ANDROID
-	if (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN && game->config.fullscreen) {
-		float x = Clamp(0, 1, (ev->touch.x - game->clip_rect.x) / (double)game->clip_rect.w);
-		float y = Clamp(0, 1, (ev->touch.y - game->clip_rect.y) / (double)game->clip_rect.h);
-		if ((x >= 0.93) && (y <= 0.1)) {
-			UnloadAllGamestates(game);
-			return;
-		}
+	if (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN && !ev->touch.primary && data->hovered != -1 && data->mode[data->hovered] != -1) {
+		al_set_sample_instance_gain(data->song[data->hovered][data->mode[data->hovered]], 0.0);
+		data->mode[data->hovered] = -1;
+		data->hovered = -1;
+		return;
 	}
 
-	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && game->config.fullscreen) {
-		float x = Clamp(0, 1, (ev->mouse.x - game->clip_rect.x) / (double)game->clip_rect.w);
-		float y = Clamp(0, 1, (ev->mouse.y - game->clip_rect.y) / (double)game->clip_rect.h);
-		if ((x >= 0.93) && (y <= 0.1)) {
+	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || ev->type == ALLEGRO_EVENT_MOUSE_AXES) {
+		game->data->mouseX = Clamp(0, 1, (ev->mouse.x - game->clip_rect.x) / (double)game->clip_rect.w);
+		game->data->mouseY = Clamp(0, 1, (ev->mouse.y - game->clip_rect.y) / (double)game->clip_rect.h);
+		UpdateHover(game, data);
+		data->timer = 0;
+	}
+	if (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) {
+		game->data->mouseX = Clamp(0, 1, (ev->touch.x - game->clip_rect.x) / (double)game->clip_rect.w);
+		game->data->mouseY = Clamp(0, 1, (ev->touch.y - game->clip_rect.y) / (double)game->clip_rect.h);
+		UpdateHover(game, data);
+		data->timer = 3;
+	}
+
+#ifndef ALLEGRO_ANDROID
+	if ((ev->type == ALLEGRO_EVENT_TOUCH_BEGIN && game->config.fullscreen) ||
+		(ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && game->config.fullscreen)) {
+		if ((game->data->mouseX >= 0.93) && (game->data->mouseY <= 0.1)) {
 			UnloadAllGamestates(game);
 			return;
 		}
 	}
 #endif
 
-	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || ev->type == ALLEGRO_EVENT_TOUCH_END) {
+	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) {
 		if (data->hovered >= 0) {
 			if (data->mode[data->hovered] >= 0) {
 				al_set_sample_instance_gain(data->song[data->hovered][data->mode[data->hovered]], 0.0);
@@ -412,6 +422,7 @@ void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 			al_play_sample_instance(data->song[i][j]);
 		}
 	}
+	data->timer = 0;
 }
 
 void Gamestate_Stop(struct Game* game, struct GamestateResources* data) {

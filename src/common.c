@@ -30,15 +30,6 @@ bool GlobalEventHandler(struct Game* game, ALLEGRO_EVENT* ev) {
 		ToggleFullscreen(game);
 	}
 
-	if (ev->type == ALLEGRO_EVENT_MOUSE_AXES) {
-		game->data->mouseX = Clamp(0, 1, (ev->mouse.x - game->clip_rect.x) / (double)game->clip_rect.w);
-		game->data->mouseY = Clamp(0, 1, (ev->mouse.y - game->clip_rect.y) / (double)game->clip_rect.h);
-	}
-	if (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) {
-		game->data->mouseX = Clamp(0, 1, (ev->touch.x - game->clip_rect.x) / (double)game->clip_rect.w);
-		game->data->mouseY = Clamp(0, 1, (ev->touch.y - game->clip_rect.y) / (double)game->clip_rect.h);
-	}
-
 #ifdef ALLEGRO_ANDROID
 	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_BACK)) {
 		QuitGame(game, true);
