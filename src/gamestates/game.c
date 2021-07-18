@@ -91,7 +91,6 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 
 	float time = al_get_sample_instance_position(data->song[0][0]) / (float)al_get_sample_instance_length(data->song[0][0]) * 8;
 
-	al_clear_to_color(al_map_rgb(255, 255, 255));
 	al_draw_rotated_bitmap(data->light, 0, 0, 445, 160, cos(al_get_time() * ALLEGRO_PI / 2.0) / 32.0, ALLEGRO_FLIP_HORIZONTAL);
 	al_draw_rotated_bitmap(data->light, al_get_bitmap_width(data->light), 0, 1640, 160, sin(al_get_time() * ALLEGRO_PI / 2.0) / 32.0, 0);
 	al_draw_bitmap(data->scene, 0, 0, 0);

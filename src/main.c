@@ -48,6 +48,8 @@ int main(int argc, char** argv) {
 		});
 	if (!game) { return 1; }
 
+	SetBackgroundColor(game, al_map_rgb(255, 255, 255));
+
 	LoadGamestate(game, "holypangolin");
 	LoadGamestate(game, "dosowisko");
 	StartGamestate(game, "holypangolin");

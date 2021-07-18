@@ -46,7 +46,9 @@ void Gamestate_Unload(struct Game* game, struct GamestateResources* data) {
 	free(data);
 }
 
-void Gamestate_Start(struct Game* game, struct GamestateResources* data) {}
+void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
+	SetBackgroundColor(game, al_map_rgb(255, 255, 255));
+}
 void Gamestate_Stop(struct Game* game, struct GamestateResources* data) {}
 
 void Gamestate_Reload(struct Game* game, struct GamestateResources* data) {}

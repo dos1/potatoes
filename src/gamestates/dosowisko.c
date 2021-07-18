@@ -153,6 +153,7 @@ void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 	TM_AddDelay(data->timeline, 1.0);
 	TM_AddAction(data->timeline, End, NULL);
 	al_play_sample_instance(data->sound);
+	SetBackgroundColor(game, al_map_rgb(0, 0, 0));
 }
 
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev) {

@@ -41,7 +41,6 @@ void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double 
 }
 
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
-	al_clear_to_color(al_map_rgb(255, 255, 255));
 	al_draw_scaled_bitmap(data->bmp, 0, 0, al_get_bitmap_width(data->bmp), al_get_bitmap_height(data->bmp), 0, 0, game->viewport.width, game->viewport.height, 0);
 
 	if (data->counter < 320) {
