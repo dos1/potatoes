@@ -7,3 +7,4 @@ Comment=Singing potatoes that are very non-competitive.
 Icon=potatoes
 Terminal=false
 Categories=Game;ArcadeGame;
+X-Purism-FormFactor=Workstation;Mobile;
