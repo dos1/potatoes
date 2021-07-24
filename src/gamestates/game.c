@@ -286,6 +286,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 	}
 
 #ifndef ALLEGRO_ANDROID
+#ifndef __SWITCH__
 	if ((ev->type == ALLEGRO_EVENT_TOUCH_BEGIN && game->config.fullscreen) ||
 		(ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && game->config.fullscreen)) {
 		if ((game->data->mouseX >= 0.93) && (game->data->mouseY <= 0.1)) {
@@ -293,6 +294,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 			return;
 		}
 	}
+#endif
 #endif
 
 	if (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) {
