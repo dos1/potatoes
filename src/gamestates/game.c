@@ -425,6 +425,7 @@ void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 		}
 	}
 	data->timer = 0;
+	data->hovered = -1;
 }
 
 void Gamestate_Stop(struct Game* game, struct GamestateResources* data) {
