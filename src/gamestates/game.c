@@ -239,8 +239,8 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 
 	for (int i = 0; i < 8; i++) {
 		if (data->mode[i] >= 0 && data->hovered == i) {
-			al_draw_text(data->font, al_map_rgb(255, 255, 255), game->data->mouseX * game->viewport.width + 3, game->data->mouseY * game->viewport.height + 3, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
-			al_draw_text(data->font, al_map_rgb(0, 0, 0), game->data->mouseX * game->viewport.width, game->data->mouseY * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+			al_draw_text(data->font, al_map_rgb(255, 255, 255), (game->data->mouseX + 0.02) * game->viewport.width + 3, (game->data->mouseY + 0.02) * game->viewport.height + 3, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
+			al_draw_text(data->font, al_map_rgb(0, 0, 0), (game->data->mouseX + 0.02) * game->viewport.width, (game->data->mouseY + 0.02) * game->viewport.height, ALLEGRO_ALIGN_LEFT, PunchNumber(game, "X", 'X', data->mode[i] + 1));
 		}
 	}
 
