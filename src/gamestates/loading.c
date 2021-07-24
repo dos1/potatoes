@@ -34,8 +34,8 @@ void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double 
 
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	al_draw_bitmap(data->stage, 0, 0, 0);
-	al_draw_filled_rectangle(game->viewport.width * 0.44, game->viewport.height * 0.55, game->viewport.width * 0.64, game->viewport.height * 0.57, al_map_rgba(222, 222, 222, 255));
-	al_draw_filled_rectangle(game->viewport.width * 0.44, game->viewport.height * 0.55, game->viewport.width * (0.44 + 0.2 * game->loading.progress), game->viewport.height * 0.57, al_map_rgba(128, 128, 128, 255));
+	al_draw_filled_rectangle(game->viewport.width * 0.42, game->viewport.height * 0.55, game->viewport.width * 0.62, game->viewport.height * 0.57, al_map_rgba(222, 222, 222, 255));
+	al_draw_filled_rectangle(game->viewport.width * 0.42, game->viewport.height * 0.55, game->viewport.width * (0.42 + 0.2 * game->loading.progress), game->viewport.height * 0.57, al_map_rgba(128, 128, 128, 255));
 };
 
 void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*)) {
