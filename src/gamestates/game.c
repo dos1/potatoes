@@ -250,9 +250,11 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 
 #ifndef ALLEGRO_ANDROID
 #ifndef __SWITCH__
+#ifndef __vita__
 	if (game->config.fullscreen) {
 		al_draw_text(data->font, al_map_rgb(0, 0, 0), game->viewport.width - 50, 20, ALLEGRO_ALIGN_RIGHT, "X");
 	}
+#endif
 #endif
 #endif
 }
@@ -287,6 +289,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 
 #ifndef ALLEGRO_ANDROID
 #ifndef __SWITCH__
+#ifndef __vita__
 	if ((ev->type == ALLEGRO_EVENT_TOUCH_BEGIN && game->config.fullscreen) ||
 		(ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && game->config.fullscreen)) {
 		if ((game->data->mouseX >= 0.93) && (game->data->mouseY <= 0.1)) {
@@ -294,6 +297,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 			return;
 		}
 	}
+#endif
 #endif
 #endif
 
