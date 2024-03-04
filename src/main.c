@@ -30,6 +30,11 @@ static _Noreturn void derp(int sig) {
 }
 
 int main(int argc, char** argv) {
+#ifdef __vita__
+	scePowerSetArmClockFrequency(444);
+	scePowerSetBusClockFrequency(222);
+#endif
+
 	signal(SIGSEGV, derp);
 
 	srand(time(NULL));
@@ -41,7 +46,7 @@ int main(int argc, char** argv) {
 		(struct Params){
 			1920,
 			1080,
-			.handlers = (struct Handlers){
+			.handlers = {
 				.event = GlobalEventHandler,
 				.destroy = DestroyGameData,
 			},
